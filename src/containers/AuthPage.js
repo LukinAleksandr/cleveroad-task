@@ -1,9 +1,13 @@
-import React, { useState } from 'react'
-import classes from './AuthPage.sass'
-import is from 'is_js'
+import React, { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import './AuthPage.sass'
+import { validateInput } from '../validate/validateInput'
+import { authSuccess, logout } from '../store/actions/auth'
 import Input from '../components/UI/Input/Input'
+import { useHttp } from '../hooks/http.hook'
 
 const AuthPage = () => {
+  console.log('AuthPage')
   let [form, setForm] = useState({
     isFormValid: false,
     formInputs: {
@@ -33,28 +37,57 @@ const AuthPage = () => {
       },
     },
   })
-  const loginHandler = (ev) => {
-    ev.preventDefault()
-    console.log('qq')
-  }
+  const dispatch = useDispatch()
+  const { loading, request, error } = useHttp()
 
-  const validateInput = (value, validation) => {
-    if (!validation) {
-      return true
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      const expirationDate = new Date(localStorage.getItem('expirationDate'))
+      if (expirationDate > new Date()) {
+        console.log(expirationDate.getTime() - new Date().getTime())
+        dispatch(authSuccess(token))
+        setTimeout(() => {
+          dispatch(logout())
+        }, expirationDate.getTime() - new Date().getTime())
+      }
     }
-    let isValid = true
+  }, [])
 
-    if (validation.required) {
-      isValid = value.trim() !== '' && isValid
+  const authHandler = async (method) => {
+    let url = ''
+    if (!method) {
+      return false
     }
-    if (validation.email) {
-      isValid = is.email(value) && isValid
-    }
-    if (validation.minLength) {
-      isValid = value.length >= validation.minLength && isValid
+    if (method === 'reg') {
+      url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCADADOx-1HOi2p0bcUZw6AzpM-dlbRQEo'
     }
 
-    return isValid
+    if (method === 'log') {
+      url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCADADOx-1HOi2p0bcUZw6AzpM-dlbRQEo'
+    }
+
+    let fetch = await request(url, 'POST', {
+      email: form.formInputs.email.value,
+      password: form.formInputs.password.value,
+      returnSecureToken: true,
+    })
+    if (fetch) {
+      const expirationDate = new Date(
+        new Date().getTime() + fetch.expiresIn * 1000
+      )
+      localStorage.setItem('token', fetch.idToken)
+      localStorage.setItem('userId', fetch.localId)
+      localStorage.setItem('expirationDate', expirationDate)
+
+      dispatch(authSuccess(fetch.idToken))
+
+      setTimeout(() => {
+        dispatch(logout())
+      }, fetch.expiresIn * 1000)
+    }
   }
 
   const chengeHandler = (ev) => {
@@ -70,12 +103,6 @@ const AuthPage = () => {
     Object.keys(formInputs).forEach((name) => {
       isFormValid = formInputs[name].valid && isFormValid
     })
-
-    console.log({
-      isFormValid,
-      formInputs,
-    })
-
     setForm({
       isFormValid,
       formInputs,
@@ -104,23 +131,23 @@ const AuthPage = () => {
         })}
 
         <div id="buttons-block">
-          {' '}
           <button
             className="btn btn-primary"
-            disabled={!form.isFormValid}
-            onClick={loginHandler}
+            disabled={loading || !form.isFormValid}
+            onClick={() => authHandler('log')}
           >
             Авторизация
           </button>
           <button
             className="btn btn-success"
-            disabled={!form.isFormValid}
-            onClick={loginHandler}
+            disabled={loading || !form.isFormValid}
+            onClick={() => authHandler('reg')}
           >
             Регистрация
           </button>
         </div>
       </div>
+      <span className="error">{error}</span>
     </div>
   )
 }
