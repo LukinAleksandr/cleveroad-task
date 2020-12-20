@@ -1,7 +1,9 @@
 import React from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
-import { useRoutes } from './routes'
 import { useSelector } from 'react-redux'
+import './App.sass'
+import { useRoutes } from './routes'
+import Navbar from './components/Navbar/Navbar'
 
 function App() {
   const token = useSelector((state) => state.auth.token)
@@ -9,9 +11,10 @@ function App() {
   const routes = useRoutes(isAuth)
 
   return (
-    <div>
+    <div className="container-fluid leyout">
       <Router>
-        <div>{routes}</div>
+        {isAuth ? <Navbar></Navbar> : null}
+        <main className="container main">{routes}</main>
       </Router>
     </div>
   )

@@ -2,6 +2,8 @@ import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 import AuthPage from './containers/AuthPage'
 import ProductPage from './containers/ProductPage'
+import CreatePage from './containers/CreatePage'
+import DetalingPage from './containers/DetalingPage'
 
 export const useRoutes = (isAuthenticated) => {
   if (isAuthenticated) {
@@ -10,13 +12,13 @@ export const useRoutes = (isAuthenticated) => {
         <Route path="/products" exect>
           <ProductPage></ProductPage>
         </Route>
-        {/* <Route path="/create" exect>
+        <Route path="/create" exect>
           <CreatePage></CreatePage>
         </Route>
         <Route path="/detail/:id" exect>
           <DetalingPage></DetalingPage>
-        </Route> */}
-        <Redirect to="/products"></Redirect>
+        </Route>
+        <Redirect to="/"></Redirect>
       </Switch>
     )
   }

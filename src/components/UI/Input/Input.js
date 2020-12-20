@@ -17,8 +17,10 @@ const Input = (props) => {
       <input
         className="form-control"
         type={props.type || 'text'}
+        name={props.name || ''}
         placeholder={props.placeholder || ''}
         disabled={props.disabled || false}
+        checked={props.checked || null}
         id={htmlFor}
         onChange={props.onChange}
         value={props.values}

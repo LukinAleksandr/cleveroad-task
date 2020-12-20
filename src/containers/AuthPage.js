@@ -7,7 +7,6 @@ import Input from '../components/UI/Input/Input'
 import { useHttp } from '../hooks/http.hook'
 
 const AuthPage = () => {
-  console.log('AuthPage')
   let [form, setForm] = useState({
     isFormValid: false,
     formInputs: {
@@ -15,6 +14,7 @@ const AuthPage = () => {
         value: '',
         type: 'email',
         label: 'Email',
+        name: 'email',
         errorMessage: 'Введите корректный email!',
         valid: false,
         touched: false,
@@ -22,11 +22,13 @@ const AuthPage = () => {
           required: true,
           email: true,
         },
+        event: (ev) => chengeHandler(ev),
       },
       password: {
         value: '',
         type: 'password',
         label: 'Пароль',
+        name: 'password',
         errorMessage: 'Введите корректный пароль!',
         valid: false,
         touched: false,
@@ -34,6 +36,7 @@ const AuthPage = () => {
           required: true,
           minLength: 6,
         },
+        event: (ev) => chengeHandler(ev),
       },
     },
   })
@@ -52,9 +55,10 @@ const AuthPage = () => {
         }, expirationDate.getTime() - new Date().getTime())
       }
     }
-  }, [])
+  }, [dispatch])
 
   const authHandler = async (method) => {
+    console.log('authHandler')
     let url = ''
     if (!method) {
       return false
@@ -91,21 +95,23 @@ const AuthPage = () => {
   }
 
   const chengeHandler = (ev) => {
-    const formInputs = { ...form.formInputs }
-    const targetInput = { ...formInputs[ev.target.type] }
+    setForm((prevState) => {
+      const formInputs = { ...prevState.formInputs }
+      const targetInput = { ...formInputs[ev.target.name] }
 
-    targetInput.value = ev.target.value
-    targetInput.touched = true
-    targetInput.valid = validateInput(targetInput.value, targetInput.validation)
-    formInputs[ev.target.type] = targetInput
-    let isFormValid = true
+      targetInput.value = ev.target.value
+      targetInput.touched = true
+      targetInput.valid = validateInput(targetInput)
+      formInputs[ev.target.type] = targetInput
+      let isFormValid = true
 
-    Object.keys(formInputs).forEach((name) => {
-      isFormValid = formInputs[name].valid && isFormValid
-    })
-    setForm({
-      isFormValid,
-      formInputs,
+      Object.keys(formInputs).forEach((name) => {
+        isFormValid = formInputs[name].valid && isFormValid
+      })
+      return {
+        isFormValid,
+        formInputs,
+      }
     })
   }
 
@@ -121,11 +127,15 @@ const AuthPage = () => {
               values={input.value}
               type={input.type}
               label={input.label}
+              name={input.name}
+              checked={input.checked}
+              disabled={input.disabled || false}
               errorMessage={input.errorMessage}
               valid={input.valid}
+              event={input.event || null}
               touched={input.touched}
               shouldValidate={!!input.validation}
-              onChange={(ev) => chengeHandler(ev)}
+              onChange={input.event}
             />
           )
         })}
