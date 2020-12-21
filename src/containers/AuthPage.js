@@ -101,7 +101,10 @@ const AuthPage = () => {
 
       targetInput.value = ev.target.value
       targetInput.touched = true
-      targetInput.valid = validateInput(targetInput)
+      targetInput.valid = validateInput(
+        targetInput.value,
+        targetInput.validation
+      )
       formInputs[ev.target.type] = targetInput
       let isFormValid = true
 
