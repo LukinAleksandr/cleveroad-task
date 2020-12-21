@@ -20,15 +20,11 @@ export const validateInput = (input, prop) => {
   }
   if (prop.hasOwnProperty('minSize')) {
     isValid =
-      input.file.width >= prop.minSize &&
-      input.file.height >= prop.minSize &&
-      isValid
+      input.width >= prop.minSize && input.height >= prop.minSize && isValid
   }
   if (prop.hasOwnProperty('maxSize')) {
     isValid =
-      input.file.width <= prop.maxSize &&
-      input.file.height <= prop.maxSize &&
-      isValid
+      input.width <= prop.maxSize && input.height <= prop.maxSize && isValid
   }
   if (prop.hasOwnProperty('image')) {
     isValid = input.file.type.split('/')[0] === 'image' && isValid

@@ -2,12 +2,10 @@ import React from 'react'
 import classes from './Input.module.sass'
 
 function isInvalid({ valid, touched }) {
-  // console.log(valid, touched)
   return !valid && touched
 }
 
 const Input = (props) => {
-  console.log(props)
   const cls = [classes.Input]
   const htmlFor = `${props.type || 'text'}-${Math.random()}`
   if (isInvalid(props)) {
@@ -26,8 +24,8 @@ const Input = (props) => {
         id={htmlFor}
         onChange={props.onChange}
         value={props.value}
-        min={props.min || false}
-        max={props.max || false}
+        min={props.min || null}
+        max={props.max || null}
       />
       {isInvalid(props) ? <span>{props.errorMessage || 'Ошибка!'}</span> : null}
     </div>
