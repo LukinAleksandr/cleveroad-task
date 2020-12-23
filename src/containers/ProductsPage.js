@@ -1,47 +1,65 @@
-import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { NavLink } from 'react-router-dom'
 import ProductCard from '../components/ProductCard/ProductCard'
+import Loader from '../components/Loader/Loader'
 // import ProductCard from '../components/ProductCard/ProductCard'
-import { useHttp } from '../hooks/http.hook'
+import { fetchProducts } from '../store/actions/products'
 import './ProductsPage.sass'
 
 const ProductsPage = () => {
-  const [products, setProducts] = useState(null)
+  const dispatch = useDispatch()
   const userId = useSelector((state) => state.auth.userId)
-  const { request } = useHttp()
+  const loading = useSelector((state) => state.products.loading)
+  const products = useSelector((state) => state.products.products)
 
   useEffect(() => {
-    console.log(products)
-  }, [products])
+    dispatch(fetchProducts(dispatch, userId))
+  }, [dispatch, userId])
 
-  const printProduct = async () => {
-    const getProduct = await request(
-      `https://cleveroad-product-default-rtdb.firebaseio.com/${userId}.json`,
-      'GET'
-    )
-    setProducts(getProduct)
-
-    const html = Object.keys(products).map((item, index) => {
-      const props = products[item]
-      return (
-        <ProductCard
-          key={item + index}
-          title={props.title}
-          picture={props.picture}
-          description={props.description}
-          discount={props.discount || null}
-          price={props.price}
-        />
+  const renderProducts = () => {
+    const html =
+      products.length !== 0 ? (
+        products.map((item) => {
+          return (
+            <ProductCard
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              picture={item.picture}
+              description={item.description}
+              discount={item.discount || null}
+              price={item.price}
+              date={item.date || null}
+              button={{
+                value: 'Edit',
+                link: `/edit/${item.id}`,
+              }}
+            />
+          )
+        })
+      ) : (
+        <div className="flex">
+          <p>Список товаров пуст.</p>
+          <NavLink className="card__edit" to={`/create`}>
+            Добавить товар
+          </NavLink>
+        </div>
       )
-    })
 
     return html
   }
 
   return (
     <>
-      <h1 className="display-6">Product Page</h1>
-      <article id="product-list">{printProduct()}</article>
+      <h1 className="display-6">Список товаров</h1>
+      <article id="product-list">
+        {loading && Object.keys(products).length === 0 ? (
+          <Loader></Loader>
+        ) : (
+          renderProducts()
+        )}
+      </article>
     </>
   )
 }

@@ -6,6 +6,7 @@ import Input from '../components/UI/Input/Input'
 import { storage } from '../firebase'
 import { useHttp } from '../hooks/http.hook'
 import { useHistory } from 'react-router-dom'
+import ProductCard from '../components/ProductCard/ProductCard'
 
 const CreatePage = () => {
   const history = useHistory()
@@ -27,6 +28,7 @@ const CreatePage = () => {
     width: null,
     height: null,
   })
+  const [filePreview, setFilePreview] = useState(null)
   const [image, setImage] = useState(null)
   const [descriptionInput, setDescriptionInput] = useState({
     value: '',
@@ -81,6 +83,7 @@ const CreatePage = () => {
       let _URL = window.URL || window.webkitURL
       let img = new Image()
       let objectUrl = _URL.createObjectURL(file)
+      setFilePreview(objectUrl)
       img.onload = function () {
         _URL.revokeObjectURL(objectUrl)
         callback((prevState) => {
@@ -172,7 +175,12 @@ const CreatePage = () => {
     )
   }
 
+  useEffect(() => {
+    console.log(dateInput)
+  }, [dateInput])
   const writeInDatabase = async (url) => {
+    const date =
+      dateInput.value.trim() !== '' ? new Date(dateInput.value).getTime() : null
     try {
       let fetch = await request(
         `https://cleveroad-product-default-rtdb.firebaseio.com/${userId}.json`,
@@ -184,7 +192,7 @@ const CreatePage = () => {
           price: priceInput.value,
           discount:
             discountInput.value.trim() !== '' ? discountInput.value : null,
-          date: dateInput.value.trim() !== '' ? dateInput.value : null,
+          date: date,
         }
       )
       history.push(`/edit/${fetch.name}`)
@@ -209,86 +217,100 @@ const CreatePage = () => {
     discountInput,
     dateInput,
   ])
+  console.log(image)
 
   return (
     <div className="content">
       <h2>Добавить товар</h2>
-      <div id="form-create">
-        <Input
-          value={titleInput.value}
-          name="title"
-          label="Название товара"
-          touched={!!titleInput.value}
-          errorMessage="Введите название товара длинной 20-60 символов!"
-          valid={titleInput.isValid}
-          onChange={(ev) => changeTextInput(ev, setTitleInput)}
-        ></Input>
-        <Input
-          type="file"
-          errorMessage="Добавте фото товара размерами 200-4000px!"
-          touched={!!fileInput.name}
-          valid={fileInput.isValid}
-          label="Фото товара"
-          onChange={(ev) => changeFileInput(ev, setFileInput)}
-        ></Input>
-        <Input
-          value={descriptionInput.value}
-          name="description"
-          label="Описание товара"
-          touched={!!descriptionInput.value}
-          errorMessage="Максимальная длинна 200 символов!"
-          valid={descriptionInput.isValid}
-          onChange={(ev) => changeTextInput(ev, setDescriptionInput)}
-        ></Input>
-        <Input
-          value={priceInput.value}
-          name="price"
-          label="Стоимость товара"
-          touched={!!priceInput.value}
-          errorMessage="Некорректная стоимость товара!"
-          type="number"
-          valid={priceInput.isValid}
-          onChange={(ev) => changeTextInput(ev, setPriceInput)}
-        ></Input>
-        <Input
-          checked={checkedInput}
-          type="checkbox"
-          label="Добавить скидку"
-          onChange={(ev) => toggleCheckbox(ev, setCheckedInput)}
-        ></Input>
-        <Input
-          value={discountInput.value}
-          name="discount"
-          label="Процент скидки"
-          touched={!!discountInput.value}
-          errorMessage="Процент скидки от 10 до 90!"
-          type="number"
-          disabled={!checkedInput}
-          valid={!checkedInput ? true : discountInput.isValid}
-          onChange={(ev) => changeTextInput(ev, setDiscountInput)}
-        ></Input>
-        <Input
-          value={dateInput.value}
-          name="date"
-          errorMessage="Введите корректную дату!"
-          type="date"
-          valid={dateInput.isValid}
-          label="Дата окончания скидки"
-          touched={!!discountInput}
-          disabled={!checkedInput || discountInput.value.trim() === ''}
-          min={`${new Date().getFullYear()}-${
-            new Date().getMonth() + 1
-          }-${new Date().getDate()}`}
-          onChange={(ev) => changeTextInput(ev, setDateInput)}
-        ></Input>
-        <div id="buttons-block">
-          <button
-            className="btn btn-primary"
-            onClick={clickHandler}
-            disabled={loading || !validForm}
-          >
-            Добавить
-          </button>
+      <div className="wrapper">
+        <div className="preview">
+          <h5>Предварительный просмотр</h5>
+          <ProductCard
+            title={titleInput.value}
+            picture={filePreview}
+            description={descriptionInput.value}
+            discount={discountInput.value || null}
+            price={priceInput.value}
+            date={new Date(dateInput.value).getTime() || null}
+          />
+        </div>
+        <div id="form-create">
+          <Input
+            value={titleInput.value}
+            name="title"
+            label="Название товара"
+            touched={!!titleInput.value}
+            errorMessage="Введите название товара длинной 20-60 символов!"
+            valid={titleInput.isValid}
+            onChange={(ev) => changeTextInput(ev, setTitleInput)}
+          ></Input>
+          <Input
+            type="file"
+            errorMessage="Добавте фото товара размерами 200-4000px!"
+            touched={!!fileInput.name}
+            valid={fileInput.isValid}
+            label="Фото товара"
+            onChange={(ev) => changeFileInput(ev, setFileInput)}
+          ></Input>
+          <Input
+            value={descriptionInput.value}
+            name="description"
+            label="Описание товара"
+            touched={!!descriptionInput.value}
+            errorMessage="Максимальная длинна 200 символов!"
+            valid={descriptionInput.isValid}
+            onChange={(ev) => changeTextInput(ev, setDescriptionInput)}
+          ></Input>
+          <Input
+            value={priceInput.value}
+            name="price"
+            label="Стоимость товара"
+            touched={!!priceInput.value}
+            errorMessage="Некорректная стоимость товара!"
+            type="number"
+            valid={priceInput.isValid}
+            onChange={(ev) => changeTextInput(ev, setPriceInput)}
+          ></Input>
+          <Input
+            checked={checkedInput}
+            type="checkbox"
+            label="Добавить скидку"
+            onChange={(ev) => toggleCheckbox(ev, setCheckedInput)}
+          ></Input>
+          <Input
+            value={discountInput.value}
+            name="discount"
+            label="Процент скидки"
+            touched={!!discountInput.value}
+            errorMessage="Процент скидки от 10 до 90!"
+            type="number"
+            disabled={!checkedInput}
+            valid={!checkedInput ? true : discountInput.isValid}
+            onChange={(ev) => changeTextInput(ev, setDiscountInput)}
+          ></Input>
+          <Input
+            value={dateInput.value}
+            name="date"
+            errorMessage="Введите корректную дату!"
+            type="date"
+            valid={dateInput.isValid}
+            label="Дата окончания скидки"
+            touched={!!discountInput}
+            disabled={!checkedInput || discountInput.value.trim() === ''}
+            min={`${new Date().getFullYear()}-${
+              new Date().getMonth() + 1
+            }-${new Date().getDate()}`}
+            onChange={(ev) => changeTextInput(ev, setDateInput)}
+          ></Input>
+          <div id="buttons-block">
+            <button
+              className="btn btn-primary"
+              onClick={clickHandler}
+              disabled={loading || !validForm}
+            >
+              Добавить
+            </button>
+          </div>
         </div>
       </div>
     </div>

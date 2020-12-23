@@ -5,6 +5,7 @@
   transition: 0.3s
   cursor: pointer
   box-shadow: 0 1px 3px rgba(0,0,0,.12)
+  height: 345px
   &__preview
     height: 170px
     display: flex
@@ -21,23 +22,37 @@
     font-size: 14px
     line-height: 18px
     font-weight: 500
+    height: 40px
+    margin-bottom: 0
+    overflow: hidden
     color: #3b6d9a
     cursor: pointer
     transition: .3s
   &__description
     font-size: 12px
+    line-height: 15px
+    height: 45px
+    margin-bottom: 0
+    overflow: hidden
     line-height: 14px
     font-weight: 300
   &__discount
+    display: flex
+    height: 20px
+    justify-content: space-between 
+    margin: 5px
     .badge
       color: #fff
   &__prices 
     display: flex
+    height: 40px
     justify-content: space-start
     align-items: center
     &_discount
       margin-left: 10px
     p
+      font-size: 13px
+      font-weight: 500
       margin-bottom: 0
   &__edit
     display: inline-block
