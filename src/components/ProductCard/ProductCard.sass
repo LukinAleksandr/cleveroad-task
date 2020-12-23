@@ -1,0 +1,61 @@
+.card:hover
+    box-shadow: 5px 5px 5px rgba(0,0,0,.22)
+.card
+  margin: 10px
+  transition: 0.3s
+  cursor: pointer
+  box-shadow: 0 1px 3px rgba(0,0,0,.12)
+  &__preview
+    height: 170px
+    display: flex
+    box-sizing: border-box
+    padding: 3px
+    justify-content: center
+    align-items: center
+    img
+      height: 170px
+      display: flex
+  &__body
+    padding: 5px
+  &__title
+    font-size: 14px
+    line-height: 18px
+    font-weight: 500
+    color: #3b6d9a
+    cursor: pointer
+    transition: .3s
+  &__description
+    font-size: 12px
+    line-height: 14px
+    font-weight: 300
+  &__discount
+    .badge
+      color: #fff
+  &__prices 
+    display: flex
+    justify-content: space-start
+    align-items: center
+    &_discount
+      margin-left: 10px
+    p
+      margin-bottom: 0
+  &__edit
+    display: inline-block
+    font-weight: 400
+    line-height: 1.5
+    color: #212529
+    text-align: center
+    text-decoration: none
+    vertical-align: middle
+    cursor: pointer
+    border: 1px solid #0dcaf0;
+    padding: .375rem .75rem
+    font-size: 1rem
+    border-radius: .25rem
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out
+    margin-left: auto
+    min-width: 70px
+    outline: none
+    background-color: #0dcaf0
+  &__edit:hover
+    text-decoration: none

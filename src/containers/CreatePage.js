@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import './CreatePage.sass'
 import { validateInput } from '../validate/validateInput'
 import Input from '../components/UI/Input/Input'
+import { storage } from '../firebase'
+import { useHttp } from '../hooks/http.hook'
+import { useHistory } from 'react-router-dom'
 
 const CreatePage = () => {
+  const history = useHistory()
+  const userId = useSelector((state) => state.auth.userId)
+  const { request, loading } = useHttp()
   const [validForm, setValidForm] = useState(false)
   const [titleInput, setTitleInput] = useState({
     value: '',
@@ -16,11 +23,11 @@ const CreatePage = () => {
   })
   const [fileInput, setFileInput] = useState({
     name: '',
-    type: '',
     isValid: false,
     width: null,
     height: null,
   })
+  const [image, setImage] = useState(null)
   const [descriptionInput, setDescriptionInput] = useState({
     value: '',
     isValid: false,
@@ -69,24 +76,13 @@ const CreatePage = () => {
 
   const changeFileInput = (ev, callback) => {
     let file = ev.target.files[0]
+    setImage(file)
     if (file.type.split('/')[0] === 'image') {
       let _URL = window.URL || window.webkitURL
       let img = new Image()
       let objectUrl = _URL.createObjectURL(file)
       img.onload = function () {
         _URL.revokeObjectURL(objectUrl)
-        console.log(
-          validateInput(
-            {
-              width: this.width,
-              height: this.height,
-            },
-            {
-              minSize: 200,
-              maxSize: 4000,
-            }
-          )
-        )
         callback((prevState) => {
           return {
             ...prevState,
@@ -103,7 +99,6 @@ const CreatePage = () => {
               }
             ),
             name: file.name,
-            type: file.type,
           }
         })
       }
@@ -116,7 +111,6 @@ const CreatePage = () => {
           height: null,
           isValid: false,
           name: file.name,
-          type: file.type,
         }
       })
     }
@@ -153,6 +147,48 @@ const CreatePage = () => {
       })
     }
     callback(status)
+  }
+  const clickHandler = () => {
+    const uploadTask = storage.ref(`${userId}/${image.name}`).put(image)
+    uploadTask.on(
+      'state_changet',
+      (snapshot) => {
+        // const progress = Math.round(
+        //   (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        // )
+      },
+      (error) => {
+        console.log(error)
+      },
+      () => {
+        storage
+          .ref(userId)
+          .child(image.name)
+          .getDownloadURL()
+          .then((url) => {
+            writeInDatabase(url)
+          })
+      }
+    )
+  }
+
+  const writeInDatabase = async (url) => {
+    try {
+      let fetch = await request(
+        `https://cleveroad-product-default-rtdb.firebaseio.com/${userId}.json`,
+        'POST',
+        {
+          title: titleInput.value,
+          picture: url,
+          description: descriptionInput.value,
+          price: priceInput.value,
+          discount:
+            discountInput.value.trim() !== '' ? discountInput.value : null,
+          date: dateInput.value.trim() !== '' ? dateInput.value : null,
+        }
+      )
+      history.push(`/edit/${fetch.name}`)
+    } catch (e) {}
   }
 
   useEffect(() => {
@@ -246,7 +282,11 @@ const CreatePage = () => {
           onChange={(ev) => changeTextInput(ev, setDateInput)}
         ></Input>
         <div id="buttons-block">
-          <button className="btn btn-primary" disabled={!validForm}>
+          <button
+            className="btn btn-primary"
+            onClick={clickHandler}
+            disabled={loading || !validForm}
+          >
             Добавить
           </button>
         </div>

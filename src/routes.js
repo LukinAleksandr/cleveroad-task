@@ -1,33 +1,33 @@
 import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 import AuthPage from './containers/AuthPage'
-import ProductPage from './containers/ProductPage'
+import ProductsPage from './containers/ProductsPage'
 import CreatePage from './containers/CreatePage'
-import DetalingPage from './containers/DetalingPage'
+import EditPage from './containers/EditPage'
 
 export const useRoutes = (isAuthenticated) => {
   if (isAuthenticated) {
     return (
       <Switch>
-        <Route path="/products" exect>
-          <ProductPage></ProductPage>
+        <Route path="/products" exact>
+          <ProductsPage />
         </Route>
-        <Route path="/create" exect>
-          <CreatePage></CreatePage>
+        <Route path="/create" exact>
+          <CreatePage />
         </Route>
-        <Route path="/detail/:id" exect>
-          <DetalingPage></DetalingPage>
+        <Route path="/edit/:id">
+          <EditPage />
         </Route>
-        <Redirect to="/"></Redirect>
+        <Redirect to="/products" />
       </Switch>
     )
   }
   return (
     <Switch>
-      <Route path="/" exect>
-        <AuthPage></AuthPage>
+      <Route path="/" exact>
+        <AuthPage />
       </Route>
-      <Redirect to="/"></Redirect>
+      <Redirect to="/" />
     </Switch>
   )
 }

@@ -15,11 +15,7 @@ const Navbar = (ev) => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav">
             <li className="nav-item">
-              <NavLink
-                className="nav-link active"
-                aria-current="page"
-                to="/products"
-              >
+              <NavLink className="nav-link active" aria-current="page" to="/">
                 Products
               </NavLink>
             </li>

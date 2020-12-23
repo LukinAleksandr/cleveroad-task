@@ -11,10 +11,10 @@ export function logout() {
   }
 }
 
-export function authSuccess(token) {
+export function authSuccess(obj) {
   console.log('AUTH_LOGIN')
   return {
     type: AUTH_LOGIN,
-    token,
+    payload: obj,
   }
 }

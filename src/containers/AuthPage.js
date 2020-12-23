@@ -45,11 +45,17 @@ const AuthPage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
+    const userId = localStorage.getItem('userId')
     if (token) {
       const expirationDate = new Date(localStorage.getItem('expirationDate'))
       if (expirationDate > new Date()) {
         console.log(expirationDate.getTime() - new Date().getTime())
-        dispatch(authSuccess(token))
+        dispatch(
+          authSuccess({
+            token,
+            userId,
+          })
+        )
         setTimeout(() => {
           dispatch(logout())
         }, expirationDate.getTime() - new Date().getTime())
@@ -86,7 +92,12 @@ const AuthPage = () => {
       localStorage.setItem('userId', fetch.localId)
       localStorage.setItem('expirationDate', expirationDate)
 
-      dispatch(authSuccess(fetch.idToken))
+      dispatch(
+        authSuccess({
+          token: fetch.idToken,
+          userId: fetch.localId,
+        })
+      )
 
       setTimeout(() => {
         dispatch(logout())
