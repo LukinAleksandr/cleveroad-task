@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux'
 import { NavLink } from 'react-router-dom'
 import ProductCard from '../components/ProductCard/ProductCard'
 import Loader from '../components/Loader/Loader'
-// import ProductCard from '../components/ProductCard/ProductCard'
 import { fetchProducts } from '../store/actions/products'
 import './ProductsPage.sass'
 

@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { database } from '../../firebase'
 import {
   FETCH_PRODUCTS_START,
   FETCH_PRODUCTS_SUCCESS,
@@ -8,26 +8,23 @@ import {
 export function fetchProducts(dispatch, userId) {
   return async (dispatch) => {
     dispatch(fetchProductsStart())
-    try {
-      const myProducts = await axios.get(
-        `https://cleveroad-product-default-rtdb.firebaseio.com/${userId}.json`
-      )
+    const productRef = database.ref(userId)
+    productRef.on('value', (snapshot) => {
       const products = []
-      Object.keys(myProducts.data).forEach((id) => {
+      const response = snapshot.val() || []
+      Object.keys(response).forEach((item) => {
         products.push({
-          id,
-          title: myProducts.data[id].title,
-          picture: myProducts.data[id].picture,
-          description: myProducts.data[id].description,
-          discount: myProducts.data[id].discount || null,
-          price: myProducts.data[id].price,
-          date: myProducts.data[id].date || null,
+          id: item,
+          title: response[item].title,
+          picture: response[item].picture,
+          description: response[item].description,
+          discount: response[item].discount || null,
+          price: response[item].price,
+          date: response[item].date || null,
         })
       })
       dispatch(fetchProductsSucces(products))
-    } catch (e) {
-      dispatch(fetchProductsError(e))
-    }
+    })
   }
 }
 

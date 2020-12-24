@@ -3,15 +3,15 @@ import { useSelector } from 'react-redux'
 import './CreatePage.sass'
 import { validateInput } from '../validate/validateInput'
 import Input from '../components/UI/Input/Input'
-import { storage } from '../firebase'
-import { useHttp } from '../hooks/http.hook'
+import { storage, database } from '../firebase'
 import { useHistory } from 'react-router-dom'
 import ProductCard from '../components/ProductCard/ProductCard'
+import { useInput } from '../hooks/input.hook'
 
 const CreatePage = () => {
   const history = useHistory()
+  const { changeTextInput, changeFileInput } = useInput()
   const userId = useSelector((state) => state.auth.userId)
-  const { request, loading } = useHttp()
   const [validForm, setValidForm] = useState(false)
   const [titleInput, setTitleInput] = useState({
     value: '',
@@ -64,63 +64,8 @@ const CreatePage = () => {
     },
   })
 
-  const changeTextInput = (ev, callback) => {
-    const str = ev.target.value
-    ev.target.touched = true
-    callback((prevState) => {
-      return {
-        ...prevState,
-        isValid: validateInput(str, prevState.validation),
-        value: str,
-      }
-    })
-  }
-
-  const changeFileInput = (ev, callback) => {
-    let file = ev.target.files[0]
-    setImage(file)
-    if (file.type.split('/')[0] === 'image') {
-      let _URL = window.URL || window.webkitURL
-      let img = new Image()
-      let objectUrl = _URL.createObjectURL(file)
-      setFilePreview(objectUrl)
-      img.onload = function () {
-        _URL.revokeObjectURL(objectUrl)
-        callback((prevState) => {
-          return {
-            ...prevState,
-            width: this.width,
-            height: this.height,
-            isValid: validateInput(
-              {
-                width: this.width,
-                height: this.height,
-              },
-              {
-                minSize: 200,
-                maxSize: 4000,
-              }
-            ),
-            name: file.name,
-          }
-        })
-      }
-      img.src = objectUrl
-    } else {
-      callback((prevState) => {
-        return {
-          ...prevState,
-          width: null,
-          height: null,
-          isValid: false,
-          name: file.name,
-        }
-      })
-    }
-  }
   const toggleCheckbox = (ev, callback) => {
-    const status = ev.target.checked
-    if (!status) {
+    if (!ev.target.checked) {
       setDiscountInput((prevState) => {
         return {
           ...prevState,
@@ -149,7 +94,7 @@ const CreatePage = () => {
         }
       })
     }
-    callback(status)
+    callback(ev.target.checked)
   }
   const clickHandler = () => {
     const uploadTask = storage.ref(`${userId}/${image.name}`).put(image)
@@ -175,28 +120,20 @@ const CreatePage = () => {
     )
   }
 
-  useEffect(() => {
-    console.log(dateInput)
-  }, [dateInput])
-  const writeInDatabase = async (url) => {
+  const writeInDatabase = (url) => {
     const date =
       dateInput.value.trim() !== '' ? new Date(dateInput.value).getTime() : null
-    try {
-      let fetch = await request(
-        `https://cleveroad-product-default-rtdb.firebaseio.com/${userId}.json`,
-        'POST',
-        {
-          title: titleInput.value,
-          picture: url,
-          description: descriptionInput.value,
-          price: priceInput.value,
-          discount:
-            discountInput.value.trim() !== '' ? discountInput.value : null,
-          date: date,
-        }
-      )
-      history.push(`/edit/${fetch.name}`)
-    } catch (e) {}
+
+    const productRef = database.ref(userId)
+    productRef.push({
+      title: titleInput.value,
+      picture: url,
+      description: descriptionInput.value,
+      price: priceInput.value,
+      discount: discountInput.value.trim() !== '' ? discountInput.value : null,
+      date: date,
+    })
+    history.push('/products')
   }
 
   useEffect(() => {
@@ -217,8 +154,6 @@ const CreatePage = () => {
     discountInput,
     dateInput,
   ])
-  console.log(image)
-
   return (
     <div className="content">
       <h2>Добавить товар</h2>
@@ -250,7 +185,9 @@ const CreatePage = () => {
             touched={!!fileInput.name}
             valid={fileInput.isValid}
             label="Фото товара"
-            onChange={(ev) => changeFileInput(ev, setFileInput)}
+            onChange={(ev) =>
+              changeFileInput(ev, setFileInput, setImage, setFilePreview)
+            }
           ></Input>
           <Input
             value={descriptionInput.value}
@@ -306,7 +243,7 @@ const CreatePage = () => {
             <button
               className="btn btn-primary"
               onClick={clickHandler}
-              disabled={loading || !validForm}
+              disabled={!validForm}
             >
               Добавить
             </button>

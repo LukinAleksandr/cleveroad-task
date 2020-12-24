@@ -1,47 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import './AuthPage.sass'
-import { validateInput } from '../validate/validateInput'
 import { authSuccess, logout } from '../store/actions/auth'
 import Input from '../components/UI/Input/Input'
 import { useHttp } from '../hooks/http.hook'
+import { useInput } from '../hooks/input.hook'
 
 const AuthPage = () => {
-  let [form, setForm] = useState({
-    isFormValid: false,
-    formInputs: {
-      email: {
-        value: '',
-        type: 'email',
-        label: 'Email',
-        name: 'email',
-        errorMessage: 'Введите корректный email!',
-        valid: false,
-        touched: false,
-        validation: {
-          required: true,
-          email: true,
-        },
-        event: (ev) => chengeHandler(ev),
-      },
-      password: {
-        value: '',
-        type: 'password',
-        label: 'Пароль',
-        name: 'password',
-        errorMessage: 'Введите корректный пароль!',
-        valid: false,
-        touched: false,
-        validation: {
-          required: true,
-          minLength: 6,
-        },
-        event: (ev) => chengeHandler(ev),
-      },
-    },
-  })
   const dispatch = useDispatch()
   const { loading, request, error } = useHttp()
+  const { changeTextInput } = useInput()
+  const [validForm, setValidForm] = useState(false)
+  const [loginInput, setLoginInput] = useState({
+    value: '',
+    isValid: false,
+    validation: {
+      required: true,
+      email: true,
+    },
+  })
+  const [passwordInput, setPasswordInput] = useState({
+    value: '',
+    isValid: false,
+    validation: {
+      required: true,
+      minLength: 6,
+    },
+  })
+
+  useEffect(() => {
+    const validForm = loginInput.isValid && passwordInput.isValid
+    setValidForm(validForm)
+  }, [loginInput, passwordInput])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -49,7 +39,6 @@ const AuthPage = () => {
     if (token) {
       const expirationDate = new Date(localStorage.getItem('expirationDate'))
       if (expirationDate > new Date()) {
-        console.log(expirationDate.getTime() - new Date().getTime())
         dispatch(
           authSuccess({
             token,
@@ -64,7 +53,6 @@ const AuthPage = () => {
   }, [dispatch])
 
   const authHandler = async (method) => {
-    console.log('authHandler')
     let url = ''
     if (!method) {
       return false
@@ -80,8 +68,8 @@ const AuthPage = () => {
     }
 
     let fetch = await request(url, 'POST', {
-      email: form.formInputs.email.value,
-      password: form.formInputs.password.value,
+      email: loginInput.value,
+      password: passwordInput.value,
       returnSecureToken: true,
     })
     if (fetch) {
@@ -105,66 +93,41 @@ const AuthPage = () => {
     }
   }
 
-  const chengeHandler = (ev) => {
-    setForm((prevState) => {
-      const formInputs = { ...prevState.formInputs }
-      const targetInput = { ...formInputs[ev.target.name] }
-
-      targetInput.value = ev.target.value
-      targetInput.touched = true
-      targetInput.valid = validateInput(
-        targetInput.value,
-        targetInput.validation
-      )
-      formInputs[ev.target.type] = targetInput
-      let isFormValid = true
-
-      Object.keys(formInputs).forEach((name) => {
-        isFormValid = formInputs[name].valid && isFormValid
-      })
-      return {
-        isFormValid,
-        formInputs,
-      }
-    })
-  }
-
   return (
-    <div id="auth-page" className="container-fluid">
+    <div id="auth-page">
       <h2>Авторизация</h2>
       <div id="auth-form">
-        {Object.keys(form.formInputs).map((item, index) => {
-          const input = form.formInputs[item]
-          return (
-            <Input
-              key={input.type + index}
-              values={input.value}
-              type={input.type}
-              label={input.label}
-              name={input.name}
-              checked={input.checked}
-              disabled={input.disabled || false}
-              errorMessage={input.errorMessage}
-              valid={input.valid}
-              event={input.event || null}
-              touched={input.touched}
-              shouldValidate={!!input.validation}
-              onChange={input.event}
-            />
-          )
-        })}
-
+        <Input
+          value={loginInput.value}
+          name="login"
+          label="Email"
+          touched={!!loginInput.value}
+          type="email"
+          errorMessage="Введите корректный email!"
+          valid={loginInput.isValid}
+          onChange={(ev) => changeTextInput(ev, setLoginInput)}
+        ></Input>
+        <Input
+          value={passwordInput.value}
+          name="password"
+          label="Password"
+          type="password"
+          touched={!!passwordInput.value}
+          errorMessage="Введите корректный пароль!"
+          valid={passwordInput.isValid}
+          onChange={(ev) => changeTextInput(ev, setPasswordInput)}
+        ></Input>
         <div id="buttons-block">
           <button
             className="btn btn-primary"
-            disabled={loading || !form.isFormValid}
+            disabled={loading || !validForm}
             onClick={() => authHandler('log')}
           >
             Авторизация
           </button>
           <button
             className="btn btn-success"
-            disabled={loading || !form.isFormValid}
+            disabled={loading || !validForm}
             onClick={() => authHandler('reg')}
           >
             Регистрация

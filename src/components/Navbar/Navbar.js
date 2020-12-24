@@ -10,7 +10,7 @@ const Navbar = (ev) => {
     dispatch(logout())
   }
   return (
-    <nav className="navbar navbar-dark bg-dark navbar-expand-lg">
+    <nav className="top-menu navbar-dark bg-dark navbar-expand-lg">
       <div className="container-fluid">
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav">
