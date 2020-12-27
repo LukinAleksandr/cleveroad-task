@@ -12,10 +12,10 @@ const Navbar = (ev) => {
   return (
     <nav className="top-menu navbar-dark bg-dark navbar-expand-lg">
       <div className="container-fluid">
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav">
-            <li className="nav-item">
-              <NavLink className="nav-link active" aria-current="page" to="/">
+        <div id="navbar">
+          <ul id="navbar__list">
+            <li className="navbar__item">
+              <NavLink className="nav-link" to="/products">
                 Products
               </NavLink>
             </li>

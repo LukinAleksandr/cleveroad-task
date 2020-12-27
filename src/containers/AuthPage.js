@@ -43,6 +43,7 @@ const AuthPage = () => {
           authSuccess({
             token,
             userId,
+            expirationDate,
           })
         )
         setTimeout(() => {
@@ -52,6 +53,11 @@ const AuthPage = () => {
     }
   }, [dispatch])
 
+  const pressHandler = (event) => {
+    if (!loading && validForm && event.key === 'Enter') {
+      authHandler('log')
+    }
+  }
   const authHandler = async (method) => {
     let url = ''
     if (!method) {
@@ -76,14 +82,11 @@ const AuthPage = () => {
       const expirationDate = new Date(
         new Date().getTime() + fetch.expiresIn * 1000
       )
-      localStorage.setItem('token', fetch.idToken)
-      localStorage.setItem('userId', fetch.localId)
-      localStorage.setItem('expirationDate', expirationDate)
-
       dispatch(
         authSuccess({
           token: fetch.idToken,
           userId: fetch.localId,
+          expirationDate,
         })
       )
 
@@ -96,7 +99,7 @@ const AuthPage = () => {
   return (
     <div id="auth-page">
       <h2>Авторизация</h2>
-      <div id="auth-form">
+      <div id="auth-form" onKeyPress={pressHandler}>
         <Input
           value={loginInput.value}
           name="login"

@@ -10,9 +10,13 @@ export function logout() {
   }
 }
 
-export function authSuccess(obj) {
+export function authSuccess(userData) {
+  localStorage.setItem('token', userData.token)
+  localStorage.setItem('userId', userData.userId)
+  localStorage.setItem('expirationDate', userData.expirationDate)
+
   return {
     type: AUTH_LOGIN,
-    payload: obj,
+    payload: userData,
   }
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import './CreatePage.sass'
-import { validateInput } from '../validate/validateInput'
-import Input from '../components/UI/Input/Input'
-import { storage, database } from '../firebase'
 import { useHistory } from 'react-router-dom'
+import { storage, database } from '../firebase'
+import './CreatePage.sass'
 import ProductCard from '../components/ProductCard/ProductCard'
+import Input from '../components/UI/Input/Input'
+import { validateInput } from '../validate/validateInput'
 import { useInput } from '../hooks/input.hook'
 
 const CreatePage = () => {
@@ -100,11 +100,7 @@ const CreatePage = () => {
     const uploadTask = storage.ref(`${userId}/${image.name}`).put(image)
     uploadTask.on(
       'state_changet',
-      (snapshot) => {
-        // const progress = Math.round(
-        //   (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        // )
-      },
+      (snapshot) => {},
       (error) => {
         console.log(error)
       },
@@ -173,18 +169,18 @@ const CreatePage = () => {
           <Input
             value={titleInput.value}
             name="title"
-            label="Название товара"
+            label="Название"
             touched={!!titleInput.value}
-            errorMessage="Введите название товара длинной 20-60 символов!"
+            errorMessage="Введите название длинной 20-60 символов!"
             valid={titleInput.isValid}
             onChange={(ev) => changeTextInput(ev, setTitleInput)}
           ></Input>
           <Input
             type="file"
-            errorMessage="Добавте фото товара размерами 200-4000px!"
+            errorMessage="Добавте фото размерами 200-4000px!"
             touched={!!fileInput.name}
             valid={fileInput.isValid}
-            label="Фото товара"
+            label="Фото"
             onChange={(ev) =>
               changeFileInput(ev, setFileInput, setImage, setFilePreview)
             }
@@ -192,7 +188,7 @@ const CreatePage = () => {
           <Input
             value={descriptionInput.value}
             name="description"
-            label="Описание товара"
+            label="Описание"
             touched={!!descriptionInput.value}
             errorMessage="Максимальная длинна 200 символов!"
             valid={descriptionInput.isValid}
@@ -201,9 +197,9 @@ const CreatePage = () => {
           <Input
             value={priceInput.value}
             name="price"
-            label="Стоимость товара"
+            label="Стоимость"
             touched={!!priceInput.value}
-            errorMessage="Некорректная стоимость товара!"
+            errorMessage="Некорректная стоимость!"
             type="number"
             valid={priceInput.isValid}
             onChange={(ev) => changeTextInput(ev, setPriceInput)}
