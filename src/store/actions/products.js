@@ -17,6 +17,7 @@ export function fetchProducts(dispatch, userId) {
           id: item,
           title: response[item].title,
           picture: response[item].picture,
+          pictureName: response[item].pictureName,
           description: response[item].description,
           discount: response[item].discount || null,
           price: response[item].price,

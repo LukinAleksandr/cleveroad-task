@@ -124,6 +124,7 @@ const CreatePage = () => {
     productRef.push({
       title: titleInput.value,
       picture: url,
+      pictureName: image.name,
       description: descriptionInput.value,
       price: priceInput.value,
       discount: discountInput.value.trim() !== '' ? discountInput.value : null,
