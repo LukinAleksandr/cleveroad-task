@@ -26,7 +26,6 @@ const EditPage = () => {
   const userId = useSelector((state) => state.auth.userId)
 
   const product = products.find((element) => element.id === id)
-  console.log(product)
 
   const { changeTextInput, changeFileInput } = useInput()
 
@@ -254,7 +253,7 @@ const EditPage = () => {
             valid={!checkedInput ? true : discountInput.isValid}
             onChange={(ev) => changeTextInput(ev, setDiscountInput)}
           ></Input>
-          {/* <Input
+          <Input
             value={dateInput.value}
             name="date"
             errorMessage="Введите корректную дату!"
@@ -267,7 +266,7 @@ const EditPage = () => {
               new Date().getDate() + 1
             }`}
             onChange={(ev) => changeTextInput(ev, setDateInput)}
-          ></Input> */}
+          ></Input>
           <div id="buttons-block">
             <button
               className="btn btn-primary"
