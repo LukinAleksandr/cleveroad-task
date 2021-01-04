@@ -36,6 +36,7 @@ const AuthPage = () => {
   useEffect(() => {
     const token = localStorage.getItem('token')
     const userId = localStorage.getItem('userId')
+    const email = localStorage.getItem('email')
     if (token) {
       const expirationDate = new Date(localStorage.getItem('expirationDate'))
       if (expirationDate > new Date()) {
@@ -43,6 +44,7 @@ const AuthPage = () => {
           authSuccess({
             token,
             userId,
+            email,
             expirationDate,
           })
         )
@@ -84,6 +86,7 @@ const AuthPage = () => {
       )
       dispatch(
         authSuccess({
+          email: loginInput.value,
           token: fetch.idToken,
           userId: fetch.localId,
           expirationDate,

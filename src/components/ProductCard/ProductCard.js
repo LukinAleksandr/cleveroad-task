@@ -25,7 +25,7 @@ const oldPrice = (props) => {
 
 const newPrice = (props) => {
   return props.discount && props.date > new Date().getTime()
-    ? Math.round(props.price - (props.price / 100) * props.discount)
+    ? (props.price - (props.price / 100) * props.discount).toFixed(2)
     : null
 }
 
@@ -36,7 +36,7 @@ const ProductCard = (props) => {
         <img
           title={props.title}
           alt={props.title}
-          src={props.picture || 'https://via.placeholder.com/140'}
+          src={props.picture || 'https://via.placeholder.com/220'}
         />
       </div>
       <div className="card__body">
@@ -51,12 +51,12 @@ const ProductCard = (props) => {
           <p className="card__prices_price">{oldPrice(props)}</p>
           <p className="card__prices_discount">{newPrice(props)}</p>
           <p className="card__prices_cyrrency">$</p>
-          {props.button ? (
-            <NavLink className="card__edit" to={props.button.link}>
-              {props.button.value}
-            </NavLink>
-          ) : null}
         </div>
+        {props.button ? (
+          <NavLink className="card__edit" to={props.button.link}>
+            {props.button.value}
+          </NavLink>
+        ) : null}
       </div>
     </div>
   )

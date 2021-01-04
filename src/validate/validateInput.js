@@ -12,6 +12,10 @@ export const validateInput = (input, prop) => {
   if (prop.hasOwnProperty('email')) {
     isValid = is.email(input) && isValid
   }
+  if (prop.hasOwnProperty('number')) {
+    console.log(input * 1)
+    isValid = is.number(input * 1) && isValid
+  }
   if (prop.hasOwnProperty('minLength')) {
     isValid = input.trim().length >= prop.minLength && isValid
   }
@@ -30,10 +34,12 @@ export const validateInput = (input, prop) => {
     isValid = input.file.type.split('/')[0] === 'image' && isValid
   }
   if (prop.hasOwnProperty('min')) {
-    isValid = Number(input) >= prop.min && isValid
+    const penny = input.split('.')[1] || '00'
+    isValid = Number(input) >= prop.min && isValid && penny.length < 3
   }
   if (prop.hasOwnProperty('max')) {
-    isValid = Number(input) <= prop.max && isValid
+    const penny = input.split('.')[1] || '00'
+    isValid = Number(input) <= prop.max && isValid && penny.length < 3
   }
 
   return isValid

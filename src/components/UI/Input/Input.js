@@ -12,23 +12,25 @@ const Input = (props) => {
     cls.push(classes.invalid)
   }
   return (
-    <div className="form-group">
-      <label htmlFor={htmlFor}>{props.label}</label>
-      <input
-        className="form-control"
-        type={props.type || 'text'}
-        name={props.name || ''}
-        placeholder={props.placeholder || ''}
-        disabled={props.disabled || false}
-        checked={props.checked || null}
-        id={htmlFor}
-        onChange={props.onChange}
-        value={props.value}
-        min={props.min || null}
-        max={props.max || null}
-      />
+    <>
+      <div className="input-group mb-1">
+        <span className="input-group-text">{props.label}</span>
+        <input
+          className="form-control"
+          type={props.type || 'text'}
+          name={props.name || ''}
+          placeholder={props.placeholder || ''}
+          disabled={props.disabled || false}
+          checked={props.checked || null}
+          id={htmlFor}
+          onChange={props.onChange}
+          value={props.value}
+          min={props.min || null}
+          max={props.max || null}
+        />
+      </div>
       {isInvalid(props) ? <span>{props.errorMessage || 'Ошибка!'}</span> : null}
-    </div>
+    </>
   )
 }
 

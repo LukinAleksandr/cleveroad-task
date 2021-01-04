@@ -1,17 +1,17 @@
 import {
-  FETCH_PRODUCTS_START,
-  FETCH_PRODUCTS_ERROR,
+  FETCH_START,
+  FETCH_END,
   FETCH_PRODUCTS_SUCCESS,
 } from '../actions/actionsTypes'
 const initialState = {
   products: [],
-  loading: true,
+  loading: false,
   error: null,
 }
 
 const productsReducer = (state = initialState, action) => {
   switch (action.type) {
-    case FETCH_PRODUCTS_START:
+    case FETCH_START:
       return {
         ...state,
         loading: true,
@@ -22,11 +22,10 @@ const productsReducer = (state = initialState, action) => {
         loading: false,
         products: action.products,
       }
-    case FETCH_PRODUCTS_ERROR:
+    case FETCH_END:
       return {
         ...state,
         loading: false,
-        error: action.error,
       }
     default:
       return state

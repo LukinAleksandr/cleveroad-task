@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { useHistory, useParams } from 'react-router-dom'
+import { storage, database } from '../firebase'
 import './CreatePage.sass'
 import { validateInput } from '../validate/validateInput'
 import Input from '../components/UI/Input/Input'
-import { storage, database } from '../firebase'
 import { useInput } from '../hooks/input.hook'
 import ProductCard from '../components/ProductCard/ProductCard'
-import { useHistory, useParams } from 'react-router-dom'
+import { fetchEnd, fetchStart } from '../store/actions/products'
 
 const formatDate = (date) => {
   let formatDate = new Date(date)
@@ -21,7 +22,9 @@ const formatDate = (date) => {
 const EditPage = () => {
   const { id } = useParams()
   const history = useHistory()
+  const dispatch = useDispatch()
 
+  const loading = useSelector((state) => state.products.loading)
   const products = useSelector((state) => state.products.products)
   const userId = useSelector((state) => state.auth.userId)
 
@@ -73,12 +76,9 @@ const EditPage = () => {
       max: 90,
     },
   })
-  const date = useMemo(() => {
-    return formatDate(product.date)
-  }, [product.date])
 
   const [dateInput, setDateInput] = useState({
-    value: date || '',
+    value: product.date ? formatDate(product.date) : '',
     isValid: true,
     validation: {
       required: true,
@@ -119,6 +119,7 @@ const EditPage = () => {
     callback(status)
   }
   const editProduct = () => {
+    dispatch(fetchStart())
     if (image !== null) {
       const uploadTask = storage.ref(`${userId}/${image.name}`).put(image)
       uploadTask.on(
@@ -144,7 +145,7 @@ const EditPage = () => {
   const writeInDatabase = (url) => {
     const date =
       dateInput.value.trim() !== '' ? new Date(dateInput.value).getTime() : null
-    const productRef = database.ref(userId).child(id)
+    const productRef = database.ref(product.userId).child(id)
     productRef.update({
       title: titleInput.value,
       picture: url,
@@ -153,13 +154,18 @@ const EditPage = () => {
       discount: discountInput.value.trim() !== '' ? discountInput.value : null,
       date: date,
     })
+    dispatch(fetchEnd())
     history.push(`/products`)
   }
   const removeProduct = () => {
-    const productRef = database.ref(userId).child(id)
-    const productPicture = storage.ref(userId).child(product.pictureName)
+    dispatch(fetchStart())
+    const productRef = database.ref(product.userId).child(id)
+    const productPicture = storage
+      .ref(product.userId)
+      .child(product.pictureName)
     productPicture.delete()
     productRef.remove()
+    dispatch(fetchEnd())
     history.push('/products')
   }
 
@@ -184,7 +190,7 @@ const EditPage = () => {
 
   return (
     <div className="content">
-      <h2>Редактировать товар</h2>
+      <h2>Редактирование</h2>
       <div className="wrapper">
         <div className="preview">
           <h5>Предварительный просмотр</h5>
@@ -197,22 +203,22 @@ const EditPage = () => {
             date={new Date(dateInput.value).getTime() || null}
           />
         </div>
-        <div id="form-create">
+        <div id="form-edit">
           <Input
             value={titleInput.value}
             name="title"
-            label="Название товара"
+            label="Название"
             touched={!!titleInput.value}
-            errorMessage="Введите название товара длинной 20-60 символов!"
+            errorMessage="Введите название длинной 20-60 символов!"
             valid={titleInput.isValid}
             onChange={(ev) => changeTextInput(ev, setTitleInput)}
           ></Input>
           <Input
             type="file"
-            errorMessage="Добавте фото товара размерами 200-4000px!"
+            errorMessage="Добавте фото размерами 200-4000px!"
             touched={!!fileInput.name}
             valid={fileInput.isValid}
-            label="Фото товара"
+            label="Фото"
             onChange={(ev) =>
               changeFileInput(ev, setFileInput, setImage, setFilePreview)
             }
@@ -220,7 +226,7 @@ const EditPage = () => {
           <Input
             value={descriptionInput.value}
             name="description"
-            label="Описание товара"
+            label="Описание"
             touched={!!descriptionInput.value}
             errorMessage="Максимальная длинна 200 символов!"
             valid={descriptionInput.isValid}
@@ -229,9 +235,9 @@ const EditPage = () => {
           <Input
             value={priceInput.value}
             name="price"
-            label="Стоимость товара"
+            label="Стоимость"
             touched={!!priceInput.value}
-            errorMessage="Некорректная стоимость товара!"
+            errorMessage="Некорректная стоимость!"
             type="number"
             valid={priceInput.isValid}
             onChange={(ev) => changeTextInput(ev, setPriceInput)}
@@ -245,7 +251,7 @@ const EditPage = () => {
           <Input
             value={discountInput.value}
             name="discount"
-            label="Процент скидки"
+            label="%"
             touched={!!discountInput.value}
             errorMessage="Процент скидки от 10 до 90!"
             type="number"
@@ -259,19 +265,17 @@ const EditPage = () => {
             errorMessage="Введите корректную дату!"
             type="date"
             valid={dateInput.isValid}
-            label="Дата окончания скидки"
+            label="Дата окончания"
             touched={!!discountInput}
             disabled={!checkedInput || discountInput.value.trim() === ''}
-            min={`${new Date().getFullYear()}-${new Date().getMonth() + 1}-${
-              new Date().getDate() + 1
-            }`}
+            min={formatDate(new Date().getTime())}
             onChange={(ev) => changeTextInput(ev, setDateInput)}
           ></Input>
           <div id="buttons-block">
             <button
               className="btn btn-primary"
               onClick={editProduct}
-              disabled={!validForm}
+              disabled={!validForm || loading}
             >
               Редактировать
             </button>

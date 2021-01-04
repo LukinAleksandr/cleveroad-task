@@ -5,7 +5,7 @@
   transition: 0.3s
   cursor: pointer
   box-shadow: 0 1px 3px rgba(0,0,0,.12)
-  height: 345px
+  min-width: 220px
   &__preview
     height: 170px
     display: flex
@@ -14,26 +14,25 @@
     justify-content: center
     align-items: center
     img
-      height: 170px
-      display: flex
+      height: 100%
+      overflow: hidden
+      object-fit: scale-down
   &__body
     padding: 5px
+    display: flex
+    flex-direction: column
   &__title
     font-size: 14px
     line-height: 18px
     font-weight: 500
-    height: 40px
     margin-bottom: 0
-    overflow: hidden
     color: #3b6d9a
     cursor: pointer
     transition: .3s
   &__description
     font-size: 12px
     line-height: 15px
-    height: 45px
     margin-bottom: 0
-    overflow: hidden
     line-height: 14px
     font-weight: 300
   &__discount
@@ -46,6 +45,7 @@
   &__prices 
     display: flex
     height: 40px
+    overflow: hidden
     justify-content: space-start
     align-items: center
     &_discount
@@ -74,3 +74,6 @@
     background-color: #0dcaf0
   &__edit:hover
     text-decoration: none
+
+.input-group-text 
+    min-width: 120px

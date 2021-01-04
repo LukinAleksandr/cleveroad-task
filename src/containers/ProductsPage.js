@@ -51,7 +51,7 @@ const ProductsPage = () => {
 
   return (
     <>
-      <h1 className="display-6">Список товаров</h1>
+      <h1 className="display-6">Товары</h1>
       <article id="product-list">
         {loading && Object.keys(products).length === 0 ? (
           <Loader></Loader>

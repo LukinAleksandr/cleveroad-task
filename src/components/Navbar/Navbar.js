@@ -1,10 +1,11 @@
 import React from 'react'
 import './Navbar.sass'
 import { NavLink } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../store/actions/auth'
 
 const Navbar = (ev) => {
+  const email = useSelector((state) => state.auth.email)
   const dispatch = useDispatch()
   const exit = () => {
     dispatch(logout())
@@ -27,6 +28,7 @@ const Navbar = (ev) => {
           </ul>
 
           <div className="nav-button">
+            <span className="nav-email">{email}</span>
             <button className="btn btn-outline-success" onClick={() => exit()}>
               Exit
             </button>

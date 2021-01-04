@@ -1,27 +1,32 @@
 import { database } from '../../firebase'
-import {
-  FETCH_PRODUCTS_START,
-  FETCH_PRODUCTS_SUCCESS,
-  FETCH_PRODUCTS_ERROR,
-} from './actionsTypes'
+import { FETCH_START, FETCH_PRODUCTS_SUCCESS, FETCH_END } from './actionsTypes'
 
 export function fetchProducts(dispatch, userId) {
   return async (dispatch) => {
-    dispatch(fetchProductsStart())
-    const productRef = database.ref(userId)
+    dispatch(fetchStart())
+    const productRef = database.ref()
     productRef.on('value', (snapshot) => {
       const products = []
+      const general = {}
       const response = snapshot.val() || []
-      Object.keys(response).forEach((item) => {
+      Object.keys(response).forEach((user_id) => {
+        Object.keys(response[user_id]).forEach((product_id) => {
+          response[user_id][product_id].userId = user_id
+        })
+        Object.assign(general, response[user_id])
+      })
+
+      Object.keys(general).forEach((item) => {
         products.push({
           id: item,
-          title: response[item].title,
-          picture: response[item].picture,
-          pictureName: response[item].pictureName,
-          description: response[item].description,
-          discount: response[item].discount || null,
-          price: response[item].price,
-          date: response[item].date || null,
+          userId: general[item].userId,
+          title: general[item].title,
+          picture: general[item].picture,
+          pictureName: general[item].pictureName,
+          description: general[item].description,
+          discount: general[item].discount || null,
+          price: general[item].price,
+          date: general[item].date || null,
         })
       })
       dispatch(fetchProductsSucces(products))
@@ -29,15 +34,14 @@ export function fetchProducts(dispatch, userId) {
   }
 }
 
-export function fetchProductsStart() {
+export function fetchStart() {
   return {
-    type: FETCH_PRODUCTS_START,
+    type: FETCH_START,
   }
 }
-export function fetchProductsError(e) {
+export function fetchEnd() {
   return {
-    type: FETCH_PRODUCTS_ERROR,
-    error: e,
+    type: FETCH_END,
   }
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { storage, database } from '../firebase'
 import './CreatePage.sass'
@@ -7,9 +7,22 @@ import ProductCard from '../components/ProductCard/ProductCard'
 import Input from '../components/UI/Input/Input'
 import { validateInput } from '../validate/validateInput'
 import { useInput } from '../hooks/input.hook'
+import { fetchEnd, fetchStart } from '../store/actions/products'
+
+const formatDate = (date) => {
+  let formatDate = new Date(date)
+  let year = formatDate.getFullYear()
+  let month = formatDate.getMonth() + 1
+  let day = formatDate.getDate()
+  day = String(day).length === 1 ? `0${day}` : day
+  month = String(month).length === 1 ? `0${month}` : month
+  return `${year}-${month}-${day}`
+}
 
 const CreatePage = () => {
   const history = useHistory()
+  const loading = useSelector((state) => state.products.loading)
+  const dispatch = useDispatch()
   const { changeTextInput, changeFileInput } = useInput()
   const userId = useSelector((state) => state.auth.userId)
   const [validForm, setValidForm] = useState(false)
@@ -32,7 +45,7 @@ const CreatePage = () => {
   const [image, setImage] = useState(null)
   const [descriptionInput, setDescriptionInput] = useState({
     value: '',
-    isValid: false,
+    isValid: true,
     validation: {
       maxLength: 200,
     },
@@ -42,6 +55,7 @@ const CreatePage = () => {
     isValid: false,
     validation: {
       required: true,
+      number: true,
       min: 0,
       max: 99999999.99,
     },
@@ -96,7 +110,9 @@ const CreatePage = () => {
     }
     callback(ev.target.checked)
   }
+
   const clickHandler = () => {
+    dispatch(fetchStart())
     const uploadTask = storage.ref(`${userId}/${image.name}`).put(image)
     uploadTask.on(
       'state_changet',
@@ -130,6 +146,7 @@ const CreatePage = () => {
       discount: discountInput.value.trim() !== '' ? discountInput.value : null,
       date: date,
     })
+    dispatch(fetchEnd())
     history.push('/products')
   }
 
@@ -151,6 +168,7 @@ const CreatePage = () => {
     discountInput,
     dateInput,
   ])
+
   return (
     <div className="content">
       <h2>Добавить товар</h2>
@@ -190,7 +208,7 @@ const CreatePage = () => {
             value={descriptionInput.value}
             name="description"
             label="Описание"
-            touched={!!descriptionInput.value}
+            touched={true}
             errorMessage="Максимальная длинна 200 символов!"
             valid={descriptionInput.isValid}
             onChange={(ev) => changeTextInput(ev, setDescriptionInput)}
@@ -214,7 +232,7 @@ const CreatePage = () => {
           <Input
             value={discountInput.value}
             name="discount"
-            label="Процент скидки"
+            label="%"
             touched={!!discountInput.value}
             errorMessage="Процент скидки от 10 до 90!"
             type="number"
@@ -228,19 +246,17 @@ const CreatePage = () => {
             errorMessage="Введите корректную дату!"
             type="date"
             valid={dateInput.isValid}
-            label="Дата окончания скидки"
+            label="Дата окончания"
             touched={!!discountInput}
             disabled={!checkedInput || discountInput.value.trim() === ''}
-            min={`${new Date().getFullYear()}-${
-              new Date().getMonth() + 1
-            }-${new Date().getDate()}`}
+            min={formatDate(new Date().getTime())}
             onChange={(ev) => changeTextInput(ev, setDateInput)}
           ></Input>
           <div id="buttons-block">
             <button
               className="btn btn-primary"
               onClick={clickHandler}
-              disabled={!validForm}
+              disabled={!validForm || loading}
             >
               Добавить
             </button>
